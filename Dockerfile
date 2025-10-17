@@ -22,5 +22,5 @@ ENV API_HOST=0.0.0.0
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD sh -c "uvicorn main:app --host ${API_HOST} --port ${API_PORT}"
+# Run the application with proper signal handling
+CMD exec uvicorn main:app --host ${API_HOST} --port ${API_PORT}
