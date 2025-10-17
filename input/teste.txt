@@ -1,0 +1,2 @@
+Este é um arquivo de teste para demonstrar a API.
+Você pode substituir por qualquer arquivo que desejar.

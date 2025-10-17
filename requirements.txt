@@ -1,0 +1,4 @@
+# API Simples - Move arquivos + Monitor + Webhook
+Flask==3.0.0
+watchdog==3.0.0
+requests==2.31.0
