@@ -156,26 +156,77 @@ curl http://localhost:8000/check-pdf
 
 ## Deployment
 
-### Docker (Exemplo)
+### Opção 1: Docker Compose (Recomendado)
 
-Crie um `Dockerfile` para deployment:
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY main.py .
-RUN mkdir -p pdfs
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+1. Construa e execute o container:
+```bash
+docker-compose up -d
+```
+
+2. A API estará disponível em `http://localhost:8000`
+
+3. Os PDFs devem ser colocados na pasta `./pdfs` (mapeada para o container)
+
+4. Para parar:
+```bash
+docker-compose down
+```
+
+### Opção 2: Docker Manual
+
+1. Construa a imagem:
+```bash
+docker build -t importa-pdf .
+```
+
+2. Execute o container:
+```bash
+docker run -d -p 8000:8000 -v $(pwd)/pdfs:/app/pdfs importa-pdf
+```
+
+### Opção 3: Servidor Linux (Systemd)
+
+1. Instale as dependências:
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+2. Crie um arquivo de serviço systemd em `/etc/systemd/system/importa-pdf.service`:
+```ini
+[Unit]
+Description=PDF Import API
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/importa-pdf
+Environment="PATH=/opt/importa-pdf/venv/bin"
+ExecStart=/opt/importa-pdf/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+3. Inicie o serviço:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable importa-pdf
+sudo systemctl start importa-pdf
 ```
 
 ### Considerações de Produção
 
-- Configure volumes persistentes para a pasta de PDFs
-- Use variáveis de ambiente para configuração
-- Considere adicionar autenticação/autorização se necessário
-- Configure CORS se a API for chamada de um navegador
-- Implemente logs estruturados para monitoramento
+- ✅ Configure volumes persistentes para a pasta de PDFs
+- ✅ Use variáveis de ambiente para configuração
+- ⚠️ Considere adicionar autenticação/autorização se necessário
+- ⚠️ Configure CORS se a API for chamada de um navegador
+- ⚠️ Coloque atrás de um proxy reverso (nginx/traefik) com HTTPS
+- ⚠️ Configure logs estruturados para monitoramento
+- ⚠️ Implemente rate limiting para prevenir abuso
 
 ## Licença
 
